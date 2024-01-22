@@ -14,7 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include "../include/robocup_localization23/main_window.hpp"
-#include "/home/robit/catkin_ws/src/robot_config.h"
+#include "/home/robit/catkin_ws/src/robot_config.h" //only define ROBIT_HUMANOID_ROBOT_NUMBER_1
 #define DEG2RAD (M_PI / 180)
 #define PARTICLE_NUM 10000
 
@@ -59,13 +59,13 @@ struct MEASUREMENT
 {
     int NUM;
     double WEIGHT;
-};
+}; //for taking particle's weight, NUM is pt[i] index, WEIGHT is weight of pt[i]
 MEASUREMENT measurement;
-vector<MEASUREMENT> particle_weight;
+vector<MEASUREMENT> particle_weight; //vector container that take MEASUREMENT
 double sort_return(MEASUREMENT x, MEASUREMENT y)
 {
     return x.WEIGHT > y.WEIGHT;
-}
+} //function for sort particle_weight vector
 int vision_data_cnt = 0;
 int vision_data_size = 0;
 int ago_point_cnt = 0;
@@ -115,7 +115,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     buf = buf.scaled(825, 600);
 
     scene = new QGraphicsScene(this);
-    robot0.x = 550; robot0.y = 400;
+    robot0.x = 550; robot0.y = 400; //robot's starting point, center of map
 
     QObject::connect(&qnode, SIGNAL(rosShutdown()), this, SLOT(close()));
 }
@@ -128,19 +128,19 @@ MainWindow::~MainWindow() {}
 void robocup_localization23::MainWindow::main()
 {
     //INIT
-    setting();
-    sel_ball();
-    Print_Screen();
-    publish_msg();
+    setting(); //set the ball & read parameter & set odometry value by ui
+    sel_ball(); //Determine the ball to be set among the received ball data and determine the location data of the obstacle
+    Print_Screen(); //draw robot & ball & obstacle & particle in ui
+    publish_msg(); //data publish to other node
 }
 void robocup_localization23::MainWindow::sel_ball()
 {
-    robot1.b -= 0.005; robot2.b -= 0.005; robot3.b -= 0.005; robot4.b -= 0.005;
-    if(robot1.b <= 0){robot1.x = 0; robot1.y = 0; robot1.z = 0; robot1.b = 0; robot1.state = 0; ball1.x = 0; ball1.y = 0; ball1.d = 999999;}
+    robot1.b -= 0.005; robot2.b -= 0.005; robot3.b -= 0.005; robot4.b -= 0.005; //reset robot data
+    if(robot1.b <= 0){robot1.x = 0; robot1.y = 0; robot1.z = 0; robot1.b = 0; robot1.state = 0; ball1.x = 0; ball1.y = 0; ball1.d = 999999;} //if not ball data was received by other robot, that's robot data is disalbe.
     if(robot2.b <= 0){robot2.x = 0; robot2.y = 0; robot2.z = 0; robot2.b = 0; robot2.state = 0; ball2.x = 0; ball2.y = 0; ball2.d = 999999;}
     if(robot3.b <= 0){robot3.x = 0; robot3.y = 0; robot3.z = 0; robot3.b = 0; robot3.state = 0; ball3.x = 0; ball3.y = 0; ball3.d = 999999;}
     if(robot4.b <= 0){robot4.x = 0; robot4.y = 0; robot4.z = 0; robot4.b = 0; robot4.state = 0; ball4.x = 0; ball4.y = 0; ball4.d = 999999;}
-    if(visionMSG.ROBOT_VEC_X.size() > 0)
+    if(visionMSG.ROBOT_VEC_X.size() > 0) //Calculate the location when you receive data about the obstacle and do not if you do not
     {
         obstacle0.x = robot0.x + (-1)*(visionMSG.ROBOT_VEC_X[0] / 10 * cos((robot0.z) * M_PI / 180) + visionMSG.ROBOT_VEC_Y[0] / 10 * sin((robot0.z) * M_PI / 180));
         obstacle0.y = robot0.y + (visionMSG.ROBOT_VEC_X[0] / 10 * sin((robot0.z) * M_PI / 180) - visionMSG.ROBOT_VEC_Y[0] / 10 * cos((robot0.z) * M_PI / 180));
@@ -187,7 +187,7 @@ void robocup_localization23::MainWindow::sel_ball()
         if(obstacle3.nocnt > 20){obstacle3.nocnt = 20;obstacle3.x = 0;obstacle3.y = 0;}
     }
 
-    if(visionMSG.Ball_2d_X != 0 || visionMSG.Ball_2d_Y != 0)
+    if(visionMSG.Ball_2d_X != 0 || visionMSG.Ball_2d_Y != 0) //Calculate absolute coordinates when ball data is received
     {
         ball.noballcnt = 0;
         ball.x = robot0.x + (-1)*(visionMSG.Ball_2d_X / 10 * cos((robot0.z) * M_PI / 180) + visionMSG.Ball_2d_Y / 10 * sin((robot0.z) * M_PI / 180));
@@ -196,7 +196,7 @@ void robocup_localization23::MainWindow::sel_ball()
         ball.speed_y = (visionMSG.Ball_speed_X) * sin((-1) * robot0.z * DEG2RAD) + (visionMSG.Ball_speed_Y) * cos((-1) * robot0.z * DEG2RAD);
 
     }
-    else
+    else //Otherwise, disable ball data
     {
         ball.noballcnt += 1;
         if(ball.noballcnt >= 100)
@@ -208,15 +208,15 @@ void robocup_localization23::MainWindow::sel_ball()
     }
 
 
-    double min_d = visionMSG.Ball_D / 10;
+    double min_d = visionMSG.Ball_D / 10; //exceptions for ball data
     if(min_d == 0){min_d = 999999;}
     int min_i = 0;
-    if(min_d > ball1.d){min_d = ball1.d; min_i = 1;}
+    if(min_d > ball1.d){min_d = ball1.d; min_i = 1;} //Store ball data measured by each robot
     if(min_d > ball2.d){min_d = ball2.d; min_i = 2;}
     if(min_d > ball3.d){min_d = ball3.d; min_i = 3;}
     if(min_d > ball4.d){min_d = ball4.d; min_i = 4;}
 
-    if(min_i != 0 && (ball.noballcnt == 0 || ball.noballcnt == 100))
+    if(min_i != 0 && (ball.noballcnt == 0 || ball.noballcnt == 100)) //Store the most reliable ball data among ball data
     {
         if(min_i == 1)
         {
@@ -241,7 +241,7 @@ void robocup_localization23::MainWindow::sel_ball()
         ball.noballcnt = 25;
     }
 
-    if(ball.x < 100 && ball.x != 0){ball.x = 100;}
+    if(ball.x < 100 && ball.x != 0){ball.x = 100;} //exceptions to ball data
     if(ball.x > 1000){ball.x = 1000;}
     if(ball.y < 100 && ball.y != 0){ball.y = 100;}
     if(ball.y > 700){ball.y = 700;}
@@ -269,20 +269,20 @@ void robocup_localization23::MainWindow::sel_ball()
 
 void robocup_localization23::MainWindow::setting()
 {
-    vision_callback_timer += 1;
-    if(set_ball_flag)
+    vision_callback_timer += 1; //vision timer count +1
+    if(set_ball_flag) //Change ball position when set_ball_flag is activated
     {
         ball.x = ball.set_x;
         ball.y = ball.set_y;
         ball.noballcnt = 0;
     }
-    if(vision_callback_timer > 10 && set_ball_flag == 0)
+    if(vision_callback_timer > 10 && set_ball_flag == 0) //set_ball_flag가 비활성화 상태이고 timer가 10 이상이면 공 위치 비활성화
     {
         ball.x = 0;
         ball.y = 0;
     }
 
-    if(setting_flag == 0)
+    if(setting_flag == 0) //setting_flag가 0이면 입출력스트림을 통해 데이터 로드
     {
         String param = "";
         #ifdef ROBIT_HUMANOID_ROBOT_NUMBER_1
@@ -311,7 +311,7 @@ void robocup_localization23::MainWindow::setting()
             Last_Index_Num_IN >> robot0.odom_ly;
             Last_Index_Num_IN >> robot0.odom_ry;
         }
-        Last_Index_Num_IN.close();
+        Last_Index_Num_IN.close(); //setting_flag가 0이면 로드 된 데이터를 ui슬라이더에 적용
         ui.particle_range_value->setValue(particle_range);
         ui.odom_fx_value->setValue(robot0.odom_fx);
         ui.odom_bx_value->setValue(robot0.odom_bx);
@@ -319,7 +319,7 @@ void robocup_localization23::MainWindow::setting()
         ui.odom_ry_value->setValue(robot0.odom_ry);
         setting_flag = 1;
     }
-
+    //ui의 슬라이더 값을 오도메트리 값에 적용
     particle_range = ui.particle_range_value->value();
     robot0.odom_fx = ui.odom_fx_value->value();
     robot0.odom_bx = ui.odom_bx_value->value();
@@ -327,7 +327,7 @@ void robocup_localization23::MainWindow::setting()
     robot0.odom_ry = ui.odom_ry_value->value();
 }
 
-void robocup_localization23::MainWindow::publish_msg()
+void robocup_localization23::MainWindow::publish_msg() //로컬 데이터를 다른 노드에 퍼블리쉬
 {
     localizationMsg.Ball_X = ball.x;
     localizationMsg.Ball_Y = ball.y;
@@ -345,6 +345,8 @@ void robocup_localization23::MainWindow::publish_msg()
     localizationMsg.Obstacle3_Y = obstacle3.y;
     localizationPub.publish(localizationMsg);
 
+
+    //로컬 데이터 ui에 표시
     char TEXT[256];
     sprintf(TEXT, "BALL_X : %d", (int)localizationMsg.Ball_X); ui.BALL_X_value->setText(TEXT);
     sprintf(TEXT, "BALL_Y : %d", (int)localizationMsg.Ball_Y); ui.BALL_Y_value->setText(TEXT);
@@ -352,7 +354,7 @@ void robocup_localization23::MainWindow::publish_msg()
     sprintf(TEXT, "ROBOT_Y : %d", (int)localizationMsg.Robot_Y); ui.ROBOT_Y_value->setText(TEXT);
 }
 
-void robocup_localization23::MainWindow::Print_Screen()
+void robocup_localization23::MainWindow::Print_Screen() // ui 출력
 {
     //INIT
     if(scene){delete scene;}
@@ -537,7 +539,7 @@ void robocup_localization23::MainWindow::Print_Screen()
 }
 void robocup_localization23::MainWindow::mouseReleaseEvent(QMouseEvent * e)
 {
-    QPointF point = mapToParent(e->pos());
+    //set_object_flag가 활성화 되있고, 마우스 클릭 이벤트가 적용 시 해당 object를 마우스 위치로 이동
     QPoint position = mapToGlobal(QPoint(21, 60));
     if(set_robot_flag)
     {
@@ -548,6 +550,7 @@ void robocup_localization23::MainWindow::mouseReleaseEvent(QMouseEvent * e)
         robot0.TIME_STAMP.clear();
         master_target_x = 0; master_target_y = 0;
     }
+
     if(set_ball_flag)
     {
         ball.x = (point.x() - position.x()) * 100 / 75;
@@ -560,6 +563,8 @@ void robocup_localization23::MainWindow::mouseReleaseEvent(QMouseEvent * e)
 
 void robocup_localization23::MainWindow::mouseMoveEvent(QMouseEvent * e)
 {
+
+    //set_object_flag가 활성화 되있고, 마우스 이동 이벤트가 적용 시 해당 object를 마우스 위치로 이동
   QPointF point = mapToParent(e->pos());
   QPoint position = mapToGlobal(QPoint(21, 60));
   if(set_robot_flag)
@@ -581,6 +586,7 @@ void robocup_localization23::MainWindow::mouseMoveEvent(QMouseEvent * e)
 
 QPolygonF robocup_localization23::MainWindow::create_Print_robot(ROBOT robot)
 {
+    //로봇 폴리곤 생성 함수
     float zoom = 0.75;
     float Robot_model_x = robot.x * zoom;
     float Robot_model_y = robot.y * zoom;
@@ -605,6 +611,8 @@ int robocup_localization23::MainWindow::cvt_Print_xy(float target)
 }
 void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::robocup_vision23_feature::ConstPtr &msg)
 {
+    //비전 데이터가 콜백할 때, 파티클 필터를 적용
+    //부가 주석 필//
     if(Likelihood.vision_point_vect.size() > 100)
     {
         if(vision_data_size / vision_data_cnt <= 1){for(int i = 0; i < PARTICLE_NUM; i++){pt[i].random_point(robot0.x, robot0.y, 20);}}
@@ -682,10 +690,12 @@ void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::ro
 }
 void robocup_localization23::QNode::imuCallback(const msg_generate::imu_msg::ConstPtr &msg)
 {
+    //IMU를 통해 로봇의 YAW값 수신
     robot0.z = msg->yaw;
 }
 void robocup_localization23::QNode::visionCallback(const msg_generate::robocup_vision23::ConstPtr &msg)
 {
+    //비전 데이터 콜백
     visionMSG.Ball_cam_X = msg->Ball_cam_X;
     visionMSG.Ball_cam_Y = msg->Ball_cam_Y;
     visionMSG.Ball_2d_X = msg->Ball_2d_X;
@@ -712,6 +722,7 @@ void robocup_localization23::QNode::visionCallback(const msg_generate::robocup_v
 
 void robocup_localization23::QNode::coordinateCallback(const msg_generate::ikcoordinate_msg::ConstPtr &msg)
 {
+    //IK에서 콜백 받을 때 받은 WALK 값을 통해 로봇을 움직이고 파티클을 가우시안 분포로 배치
     double Xmoved = msg->X;
     double Ymoved = msg->Y;
     robot0.move(Xmoved, Ymoved);
@@ -720,6 +731,7 @@ void robocup_localization23::QNode::coordinateCallback(const msg_generate::ikcoo
 
 void robocup_localization23::QNode::gamecontrolCallback(const msg_generate::game_control_data::ConstPtr &msg)
 {
+    //게임 컨트롤러에서 콜백 받은 데이터 값을 통해 경기 데이터를 적용
     gameMSG.mySide = msg->mySide;
     gameMSG.penalty = msg->penalty;
     gameMSG.position = msg->position;
@@ -745,6 +757,7 @@ void robocup_localization23::QNode::gamecontrolCallback(const msg_generate::game
 
 void robocup_localization23::QNode::udpCallback(const msg_generate::localv2_msg::ConstPtr &msg)
 {
+    //UDP통신을 통해 받은 다른 로봇의 데이터를 내부 변수에 적용
     if(msg->robot_num == 1)
     {
         robot1.x = msg->local_x;
@@ -796,16 +809,19 @@ void robocup_localization23::QNode::udpCallback(const msg_generate::localv2_msg:
 }
 void robocup_localization23::QNode::masterCallback(const msg_generate::master2localization23::ConstPtr &msg)
 {
+    //마스터에서 받은 콜백 데이터를 적용
     master_target_x = msg->target_x;
     master_target_y = msg->target_y;
 }
 
 void robocup_localization23::MainWindow::on_btn_free_set_clicked()
 {
+    //set_robot_flag를 1로 설정
     set_robot_flag = 1;
 }
 void robocup_localization23::MainWindow::on_btn_objects_save_clicked()
 {
+    //현재 적용된 오도메트리 값을 입출력스트림을 통해 저장
     String param = "";
     #ifdef ROBIT_HUMANOID_ROBOT_NUMBER_1
         param = "/home/robit/catkin_ws/src/robocup_localization23/resources/param/PARAM1.txt";
