@@ -109,7 +109,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     connect(m_Timer, SIGNAL(timeout()), this, SLOT(main()));
     m_Timer->start(100);
 
-    QString img_path = "/home/robit/catkin_ws/src/robocup_localization23/resources/Map/2022_RoboCup_Field.png";
+    QString img_path = "/home/robit/catkin_ws/src/Vision-Local/robocup_localization23/resources/Map/2022_RoboCup_Field.png";
     QImage img(img_path);
     buf = QPixmap::fromImage(img);
     buf = buf.scaled(825, 600);

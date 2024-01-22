@@ -510,9 +510,9 @@ Mat robocup_vision23_yolov4::MainWindow::Image_processing(const cv::Mat& img)
         save_img_flag = 0;
         save_img_count += 1;
         char buf[256];
-        sprintf(buf, "/home/robit/catkin_ws/src/robocup_vision23_yolov4/img/%s%06d.png", &str_list, save_img_count);
+        sprintf(buf, "/home/robit/catkin_ws/src/Vision-Local/robocup_vision23_yolov4/img/%s%06d.png", &str_list, save_img_count);
         imwrite(buf, img);
-        sprintf(buf, "/home/robit/catkin_ws/src/robocup_vision23_yolov4/img/%s%06d.txt", &str_list, save_img_count);
+        sprintf(buf, "/home/robit/catkin_ws/src/Vision-Local/robocup_vision23_yolov4/img/%s%06d.txt", &str_list, save_img_count);
         ofstream file(buf);
         if(file.is_open())
         {
@@ -568,7 +568,7 @@ void robocup_vision23_yolov4::MainWindow::save_hsv()
 {
     if(setting_flag != -1)
     {
-        ofstream Last_Index_Num_OUT("/home/robit/catkin_ws/src/robocup_vision23_yolov4/resources/HSV/HSV.txt");
+        ofstream Last_Index_Num_OUT("/home/robit/catkin_ws/src/Vision-Local/robocup_vision23_yolov4/resources/HSV/HSV.txt");
         if(Last_Index_Num_OUT.is_open()){
             Last_Index_Num_OUT << fieldhsv.hmin << endl;
             Last_Index_Num_OUT << fieldhsv.hmax << endl;
