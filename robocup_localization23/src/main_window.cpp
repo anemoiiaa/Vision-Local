@@ -74,7 +74,7 @@ double sort_return(MEASUREMENT x, MEASUREMENT y)
 
 int vision_data_cnt = 0;
 int vision_data_size = 0;
-int ago_point_cnt = 0;
+
 
 //For print
 int robot_sight_flag = 0;
@@ -704,7 +704,7 @@ void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::ro
         vision_data_cnt = 0;
         vision_data_size = 0;
 
-        ago_point_cnt = 0;
+
         for(int i = 0; i < 27; i++)//모든 로컬 포인트 체크
         {
             if(Likelihood.Local_point_check[i] == 1)//특정 로컬 포인트가 활성화 된 상태일 시 실행
@@ -717,7 +717,7 @@ void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::ro
                 Likelihood.vision_point.STD_X = robot0.x;
                 Likelihood.vision_point.STD_Y = robot0.y;
                 Likelihood.vision_point_vect.push_back(Likelihood.vision_point);
-                ago_point_cnt += 1;
+
             }
         }
     }
