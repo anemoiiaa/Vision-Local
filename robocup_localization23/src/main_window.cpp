@@ -663,46 +663,53 @@ int robocup_localization23::MainWindow::cvt_Print_xy(float target)
 }
 void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::robocup_vision23_feature::ConstPtr &msg)
 {
-    //비전 데이터가 콜백할 때, 파티클 필터를 적용
-    //부가 주석 필//
-    if(Likelihood.vision_point_vect.size() > 100)
+    //pre condition : msg(vision)
+    //post condition : measurement, particle_weight, robot0.N,  Likelihood
+    //purpose : 비전 데이터를 콜백 할 때, 비전에서 받은 특징점 데이터를 통해 파티클의 가중치를 계산하고 가장 가중치가 높은 파티클로 로봇의 위치를 보정
+
+    if(Likelihood.vision_point_vect.size() > 100) //비전에서 충분한 양의 특징점 데이터를 찾을 시 실행
     {
-        if(vision_data_size / vision_data_cnt <= 1){for(int i = 0; i < PARTICLE_NUM; i++){pt[i].random_point(robot0.x, robot0.y, 20);}}
+        if(vision_data_size / vision_data_cnt <= 1){for(int i = 0; i < PARTICLE_NUM; i++){pt[i].random_point(robot0.x, robot0.y, 20);}} //비전에서 충분하지 못한 시간동안 데이터를 찾을 경우 파티클 재생성
         for(int i = 0; i < PARTICLE_NUM; i++)
         {
-            Likelihood.set_circle(robot0.z, Likelihood.vision_point_vect);
-            measurement.NUM = i;
-            measurement.WEIGHT = Likelihood.sence(pt[i].x, pt[i].y, robot0.x, robot0.y, Likelihood.vision_point_vect);
-            double dis = sqrt(pow(pt[i].x -robot0.x, 2) + pow(pt[i].y -robot0.y, 2));
-            dis /= particle_range;
-            if(dis < 1){dis = 1;}
-            measurement.WEIGHT /= dis;
-            particle_weight.push_back(measurement);
+            Likelihood.set_circle(robot0.z, Likelihood.vision_point_vect); //파티클 위치의 제한 설정
+            measurement.NUM = i; //파티클의 가중치를 저장하는 measurement의 NUM 값에 번호 부여
+            measurement.WEIGHT = Likelihood.sence(pt[i].x, pt[i].y, robot0.x, robot0.y, Likelihood.vision_point_vect);//파티클의 가중치를 저장하는 measurement의 WEIGHT에 해당 파티클의 가중치를 계산 한 후 가중치 값 저장
+            double dis = sqrt(pow(pt[i].x -robot0.x, 2) + pow(pt[i].y -robot0.y, 2));//파티클과 로봇의 위치 사이의 거리 계산
+            dis /= particle_range;//해당 거리를 파티클 범위로 나눗셈
+            if(dis < 1){dis = 1;} //나눗셈 결과 값이 1 이하일때 예외처리
+            measurement.WEIGHT /= dis; //가중치에 거리 값 나눗셈
+            particle_weight.push_back(measurement); //particle_weight 벡터 컨테이너에 해당 measurement값 저장
         }
-        sort(particle_weight.begin(), particle_weight.end(), sort_return);
-        if(particle_weight[0].WEIGHT > 30)
+        sort(particle_weight.begin(), particle_weight.end(), sort_return);//particle_weight 벡터 컨테이너 정렬
+        if(particle_weight[0].WEIGHT > 30)//가장 가중치가 높은 값이 30 이상일 경우 실행
         {
-            if(vision_data_size / vision_data_cnt <= 1){cout<<"SMALL MATCHING!! : "<<particle_weight[0].WEIGHT<<endl;}
-            else{cout<<"MATCHING!! : "<<particle_weight[0].WEIGHT<<endl;}
+            if(vision_data_size / vision_data_cnt <= 1){cout<<"SMALL MATCHING!! : "<<particle_weight[0].WEIGHT<<endl;}//비전에 충분한 데이터가 저장되지 않은 경우 SMALL MATCHING문구 와 함께 가중치 값 출력
+            else{cout<<"MATCHING!! : "<<particle_weight[0].WEIGHT<<endl;}//비전에 충분한 데이터가 저장된 경우 MATCHING문구 와 함께 가중치 값 출력
+
+            //robot0의 데이터를 가장 가중치가 높은 값으로 설정
             robot0.x = pt[particle_weight[0].NUM].x; //(pt[particle_weight[0].NUM].x + pt[particle_weight[1].NUM].x + pt[particle_weight[2].NUM].x) / 3;
             robot0.y = pt[particle_weight[0].NUM].y; //(pt[particle_weight[0].NUM].y + pt[particle_weight[1].NUM].y + pt[particle_weight[2].NUM].y) / 3;
         }
-        else{cout<<"FAIL!! : "<<particle_weight[0].WEIGHT<<endl;}
-        for(int i = 0; i < PARTICLE_NUM; i++){pt[i].random_point(robot0.x, robot0.y, particle_range);}
+        else{cout<<"FAIL!! : "<<particle_weight[0].WEIGHT<<endl;}//그렇지 않을 경우 가중치 값 및 실패 메세지 출력
+        for(int i = 0; i < PARTICLE_NUM; i++){pt[i].random_point(robot0.x, robot0.y, particle_range);}//파티클 재생성
 
-        Likelihood.check_local_point(50, robot0.z, Likelihood.vision_point_vect);
+        Likelihood.check_local_point(50, robot0.z, Likelihood.vision_point_vect);//특징점이 로봇 근처에 있는지에 따라 해당 특징점 활성화 또는 비활성화
 
         //robot_sight_flag = 0;
-        particle_weight.clear();
-        Likelihood.vision_point_vect.clear();
+        particle_weight.clear(); //particle_weight 벡터 컨테이너 초기화
+        Likelihood.vision_point_vect.clear(); //Likelihood.vision_point_vect 벡터 컨테이너 초기화
+
+        //vision_data_cnt 및 vision_data_size 변수 초기화
         vision_data_cnt = 0;
         vision_data_size = 0;
 
         ago_point_cnt = 0;
-        for(int i = 0; i < 27; i++)
+        for(int i = 0; i < 27; i++)//모든 로컬 포인트 체크
         {
-            if(Likelihood.Local_point_check[i] == 1)
+            if(Likelihood.Local_point_check[i] == 1)//특정 로컬 포인트가 활성화 된 상태일 시 실행
             {
+                //Likelihood에 데이터 저장
                 Likelihood.vision_point.CONFIDENCE = 0.1;
                 Likelihood.vision_point.DISTANCE = 1;
                 Likelihood.vision_point.POINT_VEC_X = Likelihood.Local_point_x[i] - robot0.x;
@@ -712,13 +719,7 @@ void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::ro
                 Likelihood.vision_point_vect.push_back(Likelihood.vision_point);
                 ago_point_cnt += 1;
             }
-
         }
-
-
-
-
-
     }
 
     for(int i = 0; i < msg->CONFIDENCE.size(); i++)
