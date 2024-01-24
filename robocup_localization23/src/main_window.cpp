@@ -65,8 +65,8 @@ MEASUREMENT measurement;
 vector<MEASUREMENT> particle_weight; //purpose : MEASUREMENT를 저장하는 벡터 컨테이너
 
 double sort_return(MEASUREMENT x, MEASUREMENT y)
-//pre condition : MEASUREMENT 구조체 두개
-//post condition : 두 구조체 중 WEIGHT멤버가 더 큰 쪽이 리턴
+//PRE CONDITION : MEASUREMENT 구조체 두개
+//POST CONDITION : 두 구조체 중 WEIGHT멤버가 더 큰 쪽이 리턴
 //purpose : MEASUREMENT 구조체를 담는 particle_weight 벡터 컨테이너에서 sort함수를 사용하기 위한 매개함수
 {
     return x.WEIGHT > y.WEIGHT;
@@ -142,8 +142,8 @@ void robocup_localization23::MainWindow::main()
 }
 void robocup_localization23::MainWindow::sel_ball()
 {
-    //pre condition : robotX.b, visionMSG, ball 데이터 - 해당 데이터는 다른 노드에서 통신받아 옴
-    //post condition : obstacleX, ball 데이터
+    //PRE CONDITION : robotX.b, visionMSG, ball 데이터 - 해당 데이터는 다른 노드에서 통신받아 옴
+    //POST CONDITION : obstacleX, ball 데이터
     //purpose : 다른 로봇에서 받아 온 공 데이터로 최종 공 위치 설정, 이때 최종 공 위치는 각 로봇의 공 데이터 중 가장 공과 가까운 로봇의 데이터로 설정 & obstacle 의 위치 설정
 
     //로봇의 공 데이터 초기화
@@ -292,8 +292,8 @@ void robocup_localization23::MainWindow::sel_ball()
 
 void robocup_localization23::MainWindow::setting()
 {
-    //pre condition : vision_callback_timer, set_ball_flag, ball_set_N, setting_flag, 파라미터 저장파일
-    //post condition : ball_N, robot0.odom_Nn
+    //PRE CONDITION : vision_callback_timer, set_ball_flag, ball_set_N, setting_flag, 파라미터 저장파일
+    //POST CONDITION : ball_N, robot0.odom_Nn
     //purpose : 로봇의 초기 세팅 및 입출력스트림을 통해 저장되어있던 오도메트리 값 설정, 볼의 위치를 재설정 하는 경우 볼 위치 변경, ui슬라이더를 통해 오도메트리 값 적용
 
     vision_callback_timer += 1; //vision timer count +1
@@ -356,8 +356,8 @@ void robocup_localization23::MainWindow::setting()
 
 void robocup_localization23::MainWindow::publish_msg()
 {
-    //pre condition : ball_n, ball_speed_n, visionMSG.Ball_speed_level, robot0.n, obstacleX.n
-    //post condition : localizationMsg
+    //PRE CONDITION : ball_n, ball_speed_n, visionMSG.Ball_speed_level, robot0.n, obstacleX.n
+    //POST CONDITION : localizationMsg
     //purpose : 다른 노드로 로컬 데이터를 전송 & 로컬 데이터 ui에 표시
 
     localizationMsg.Ball_X = ball.x;
@@ -387,8 +387,8 @@ void robocup_localization23::MainWindow::publish_msg()
 
 void robocup_localization23::MainWindow::Print_Screen() // ui 출력
 {
-    //pre condition : robotX.n, obstacleX.n, ball.n, Likelihood
-    //post condition : UI
+    //PRE CONDITION : robotX.n, obstacleX.n, ball.n, Likelihood
+    //POST CONDITION : UI
     //purpose : UI출력
 
     //INIT
@@ -579,8 +579,8 @@ void robocup_localization23::MainWindow::Print_Screen() // ui 출력
 }
 void robocup_localization23::MainWindow::mouseReleaseEvent(QMouseEvent * e)
 {
-    //pre condition : mouseEvent, set_robot_flag, set_ball_flag
-    //post condition : robot0.n, ball.n master_target_n,
+    //PRE CONDITION : mouseEvent, set_robot_flag, set_ball_flag
+    //POST CONDITION : robot0.n, ball.n master_target_n,
     //purpose : set_object_flag가 활성화 되있고, 마우스 클릭 이벤트가 적용 시 해당 object를 마우스 위치로 이동 & 이동한 위치에 파티클 생성
 
     QPointF point = mapToParent(e->pos());
@@ -607,8 +607,8 @@ void robocup_localization23::MainWindow::mouseReleaseEvent(QMouseEvent * e)
 
 void robocup_localization23::MainWindow::mouseMoveEvent(QMouseEvent * e)
 {
-    //pre condition : mouseEvent, set_robot_flag, set_ball_flag
-    //post condition : robot0.n, ball.n master_target_n,
+    //PRE CONDITION : mouseEvent, set_robot_flag, set_ball_flag
+    //POST CONDITION : robot0.n, ball.n master_target_n,
     //purpose : set_object_flag가 활성화 되있고, 마우스 이동 이벤트가 적용 시 해당 object를 마우스 위치로 이동 & 이동한 위치에 파티클 생성
   QPointF point = mapToParent(e->pos());
   QPoint position = mapToGlobal(QPoint(21, 60));
@@ -631,8 +631,8 @@ void robocup_localization23::MainWindow::mouseMoveEvent(QMouseEvent * e)
 
 QPolygonF robocup_localization23::MainWindow::create_Print_robot(ROBOT robot)
 {
-    //pre condition : robot.n, zoom(0.75)
-    //post condition : Robot_model_poly
+    //PRE CONDITION : robot.n, zoom(0.75)
+    //POST CONDITION : Robot_model_poly
     //purpose : 로봇의 x, y, z좌표에 zoom값을 곱한 후 해당 값에 의한 폴리곤 생성
 
     float zoom = 0.75;
@@ -653,8 +653,8 @@ QPolygonF robocup_localization23::MainWindow::create_Print_robot(ROBOT robot)
 
 int robocup_localization23::MainWindow::cvt_Print_xy(float target)
 {
-    //pre condition : target
-    //post condition : tartet * 0.75
+    //PRE CONDITION : target
+    //POST CONDITION : tartet * 0.75
     //purpose : target에 0.75를 곱한 값을 리턴
 
     float zoom = 0.75;
@@ -663,8 +663,8 @@ int robocup_localization23::MainWindow::cvt_Print_xy(float target)
 }
 void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::robocup_vision23_feature::ConstPtr &msg)
 {
-    //pre condition : msg(vision)
-    //post condition : measurement, particle_weight, robot0.N,  Likelihood
+    //PRE CONDITION : msg(vision)
+    //POST CONDITION : measurement, particle_weight, robot0.N,  Likelihood
     //purpose : 비전 데이터를 콜백 할 때, 비전에서 받은 특징점 데이터를 통해 파티클의 가중치를 계산하고 가장 가중치가 높은 파티클로 로봇의 위치를 보정
 
     if(Likelihood.vision_point_vect.size() > 100) //비전에서 충분한 양의 특징점 데이터를 찾을 시 실행
@@ -743,16 +743,16 @@ void robocup_localization23::QNode::visionfeatureCallback(const msg_generate::ro
 }
 void robocup_localization23::QNode::imuCallback(const msg_generate::imu_msg::ConstPtr &msg)
 {
-    //pre condition : msg(imu)
-    //post condition : robot0.z
+    //PRE CONDITION : msg(imu)
+    //POST CONDITION : robot0.z
     //purpose : imu에서 로봇의 yaw값을 받아 온 후 해당 값을 robot0.z에 대입
 
     robot0.z = msg->yaw;
 }
 void robocup_localization23::QNode::visionCallback(const msg_generate::robocup_vision23::ConstPtr &msg)
 {
-    //pre condition : msg(vision)
-    //post condition : Ball_cam_N, Ball_2d_N, Ball_D, PAN, TILT, Ball_speed_N, ROBOT_VEC_N, Ball_speed_level
+    //PRE CONDITION : msg(vision)
+    //POST CONDITION : Ball_cam_N, Ball_2d_N, Ball_D, PAN, TILT, Ball_speed_N, ROBOT_VEC_N, Ball_speed_level
     //purpose : 비전에서 받아온 데이터 콜백
 
     visionMSG.Ball_cam_X = msg->Ball_cam_X;
@@ -781,8 +781,8 @@ void robocup_localization23::QNode::visionCallback(const msg_generate::robocup_v
 
 void robocup_localization23::QNode::coordinateCallback(const msg_generate::ikcoordinate_msg::ConstPtr &msg)
 {
-    //pre condition : msg(IK)
-    //post condition : Xmoved, Ymoved
+    //PRE CONDITION : msg(IK)
+    //POST CONDITION : Xmoved, Ymoved
     //purpose : IK에서 받아온 데이터 콜백 및 해당 데이터로 robot0의 위치 업데이트, 업데이트 된 위치에 파티클 가우시안 분포로 생성
 
     double Xmoved = msg->X;
@@ -793,8 +793,8 @@ void robocup_localization23::QNode::coordinateCallback(const msg_generate::ikcoo
 
 void robocup_localization23::QNode::gamecontrolCallback(const msg_generate::game_control_data::ConstPtr &msg)
 {
-    //pre condition : msg(gamecontroller)
-    //post condition : mySide, penalty, position, robotNum
+    //PRE CONDITION : msg(gamecontroller)
+    //POST CONDITION : mySide, penalty, position, robotNum
     //purpose : gamecontroller에서 콜백 받아온 경기 데이터를 적용
 
     gameMSG.mySide = msg->mySide;
@@ -822,8 +822,8 @@ void robocup_localization23::QNode::gamecontrolCallback(const msg_generate::game
 
 void robocup_localization23::QNode::udpCallback(const msg_generate::localv2_msg::ConstPtr &msg)
 {
-    //pre condition : msg(udpcom)
-    //post condition : robotX.n, ballX.n,
+    //PRE CONDITION : msg(udpcom)
+    //POST CONDITION : robotX.n, ballX.n,
     //purpose : udp통신으로 받아온 다른 로봇 데이터를 콜백하여 내부 변수에 적용
     if(msg->robot_num == 1)
     {
@@ -876,8 +876,8 @@ void robocup_localization23::QNode::udpCallback(const msg_generate::localv2_msg:
 }
 void robocup_localization23::QNode::masterCallback(const msg_generate::master2localization23::ConstPtr &msg)
 {
-    //pre condition : msg(master)
-    //post condition : master_target_N
+    //PRE CONDITION : msg(master)
+    //POST CONDITION : master_target_N
     //purpose : 마스터에서 받은 타겟 좌표 데이터 적용
 
     master_target_x = msg->target_x;
@@ -886,16 +886,16 @@ void robocup_localization23::QNode::masterCallback(const msg_generate::master2lo
 
 void robocup_localization23::MainWindow::on_btn_free_set_clicked()
 {
-    //pre condition : UI
-    //post condition : set_robot_flag
+    //PRE CONDITION : UI
+    //POST CONDITION : set_robot_flag
     //purpose : set_robot_flag를 1로 설정
 
     set_robot_flag = 1;
 }
 void robocup_localization23::MainWindow::on_btn_objects_save_clicked()
 {
-    //pre condition : particle_range, robot0.odom_Nn
-    //post condition : param file
+    //PRE CONDITION : particle_range, robot0.odom_Nn
+    //POST CONDITION : param file
     //purpose : 현재 적용되어있는 오도메트리 값을 입출력스트림을 통해 저장
 
     String param = "";
@@ -929,8 +929,8 @@ void robocup_localization23::MainWindow::on_btn_objects_save_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_1_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -950,8 +950,8 @@ void robocup_localization23::MainWindow::on_btn_set_1_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_2_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -971,8 +971,8 @@ void robocup_localization23::MainWindow::on_btn_set_2_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_3_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -992,8 +992,8 @@ void robocup_localization23::MainWindow::on_btn_set_3_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_4_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -1013,8 +1013,8 @@ void robocup_localization23::MainWindow::on_btn_set_4_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_5_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -1034,8 +1034,8 @@ void robocup_localization23::MainWindow::on_btn_set_5_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_6_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 매크로
 
     if(gameMSG.mySide)
@@ -1055,8 +1055,8 @@ void robocup_localization23::MainWindow::on_btn_set_6_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_set_auto_clicked()
 {
-    //pre condition : UI
-    //post condition : robot0.N, master_target_x
+    //PRE CONDITION : UI
+    //POST CONDITION : robot0.N, master_target_x
     //purpose : get in시 위치 자동 매크로
 
     if(gameMSG.mySide)
@@ -1112,16 +1112,16 @@ void robocup_localization23::MainWindow::on_btn_set_auto_clicked()
 }
 void robocup_localization23::MainWindow::on_btn_ball_set_clicked()
 {
-    //pre condition : UI
-    //post condition : set_ball_flag
+    //PRE CONDITION : UI
+    //POST CONDITION : set_ball_flag
     //purpose : 공 설정
 
     set_ball_flag = 1;
 }
 void robocup_localization23::MainWindow::on_btn_ball_del_clicked()
 {
-    //pre condition : UI
-    //post condition : set_ball_flag, ball.N
+    //PRE CONDITION : UI
+    //POST CONDITION : set_ball_flag, ball.N
     //purpose : 공 삭제 버튼
 
     set_ball_flag = 0;
