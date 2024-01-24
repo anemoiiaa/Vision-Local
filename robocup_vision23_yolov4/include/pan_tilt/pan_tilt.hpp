@@ -75,6 +75,10 @@ class PAN_TILT
 {
 public:
     //For Init
+
+    //PRE CONDITION :  pan_init, tilt_init
+    //POST CONDITION : PAN_TILT 객체
+    //PURPOSE : PAN_TILT 객체 생성자, PRE CONDITION값이 없으면 초기 값으로 설정되고 있다면 해당 값으로 설정됨
     PAN_TILT()
     {
         Dynamixel_ID_INIT_Position[0] = PAN_INIT;
@@ -117,7 +121,7 @@ public:
 
     //For Scan
     int Scan_index = 1; // 0 ~ (size of Scan_level) - 1
-    int Scan_level[4] ={-100, 0, 100, 0};
+    int Scan_level[4] ={-100, 0, 100, 0}; //카메라 각도
     int Scan_timer = 0;
     int Scan_stop_time = 15; //스캔속도 설정
     int Scan_nice_time = 5; //카메라가 움직이기 직전 몇장을 이미지처리 할건지
@@ -150,24 +154,35 @@ public:
 private:
     void Tracking_what(double absx, double absy)
     {
-        int dis = sqrt(pow(target_absx, 2) + pow(target_absy, 2));
+        //PRE CONDITION : absx, absy
+        //POST CONDITION : Tracking
+        //PURPOSE : 스캔할 물체의 위치에 따라 어떤 각도로 팬을 조절할지 정함
+
+        int dis = sqrt(pow(target_absx, 2) + pow(target_absy, 2)); //물체와 거리 계산
         //cout<<dis<<endl;
-        if(dis > 500)
+        if(dis > 500) //거리가 500이 넘지않으면 실행
         {
-          int angle = atan2(target_absy, target_absx) * RAD2DEG - 90;
+          int angle = atan2(target_absy, target_absx) * RAD2DEG - 90; //타겟 과의 각도 계산
+
+          //각도 예외처리
           if(angle > 180){angle -= 360;}
           else if(angle < -180){angle += 360;}
           //cout<<angle<<endl;
+
+          //+-50의 임계값에 따라 각도 설정
           if(angle < -50){Scan_index = 2;}
           else if(angle > 50){Scan_index = 0;}
           else{Scan_index = 1;}
         }
-        else{Scan_index = 1;}
-        Tracking(ptpos.PAN_POSITION, Scan_level[Scan_index]);
-        send_ptmsg();
+        else{Scan_index = 1;} //거리가 500이 넘으면 팬 각도 정면으로 설정
+        Tracking(ptpos.PAN_POSITION, Scan_level[Scan_index]); //모터 제어를 위해 값 전송
+        send_ptmsg(); //팬틸트 데이터 msg 전송
     }
     void Tracking(double now_x, double X_POINT_STANDARD)
     {
+        //PRE CONDITION : now_x = ptpos.PAN_POSITION, X_POINT_STANDARD = Scan_level[Scan_index]
+        //POST CONDITION : 팬 조절
+        //PURPOSE : 팬 트래킹 값에 따라 모터 PID제어
         double Pan_temp_glass;
 
         PID_Control_Float(&Tracking_pid_pan, X_POINT_STANDARD, now_x);
@@ -179,6 +194,10 @@ private:
 public:
     int mode(int value)
     {
+        //PRE CONDITION : value
+        //POST CONDITION : cam_nice_point
+        //PURPOSE : 로봇의 상태에 따라 팬틸트 제어
+
         if(value != 2 && value != 3){no_ball_cnt = 100; tracking_cnt = 0;}
         switch (value)
         {
@@ -216,17 +235,17 @@ public:
 
                 if(target_x != 0 || target_y != 0)
                 {
-                    Tracking_what(target_absx, target_absy);
+                    Tracking_what(target_absx, target_absy); //공 위치로 트래킹
                     no_ball_cnt = 0;
                 }
                 else
                 {
                     tracking_cnt = 0;
                 }
-                if(Scan_index == 1){Scan_nice_weight += 1;}
+                if(Scan_index == 1){Scan_nice_weight += 1;} //로봇이 정면을 보고 있는 경우 Scan_nice_weight +1
                 else{Scan_nice_weight = 0;}
-                if(Scan_nice_weight >= 5){return 1;}
-                return 2;
+                if(Scan_nice_weight >= 5){return 1;} //로봇이 정면을 보고 있는 경우 1 반환
+                return 2; //로봇이 정면을 보고 있는 경우 2 반환
 
             }
             else if(no_ball_cnt > 30)//공이 특정 시간동안 안잡힘
@@ -234,10 +253,10 @@ public:
                 ptpos.PAN_POSITION = Scan_level[Scan_index];
                 send_ptmsg();
                 Scan_timer += 1;
-                if(Scan_timer >= Scan_stop_time)
+                if(Scan_timer >= Scan_stop_time) //스캔한 시간이 임계값을 넘겼을 경우
                 {
                     Scan_timer = 0;
-                    Scan_index += 1;
+                    Scan_index += 1;//스캔 각도 이동
                     if(Scan_index >= 4){Scan_index = 0;}
                 }
                 if(Scan_timer >= Scan_stop_time - Scan_nice_time){return 1;}
